@@ -1,4 +1,4 @@
-import Util from './util.js'
+import * as util from './util.js'
 
 type color = typeof Color | Array<number> | string
 
@@ -90,17 +90,17 @@ const Color = class {
     this.value = max * 100
   }
   public rotateHue(hue: number): object {
-    this.hue = Util.clamp(this.hue + hue, 0, 100)
+    this.hue = util.clamp(this.hue + hue, 0, 100)
     this.applyHsv()
     return this
   }
   rotateSaturation(saturation: number): object {
-    this.saturation = Util.clamp(this.saturation + saturation, 0, 100)
+    this.saturation = util.clamp(this.saturation + saturation, 0, 100)
     this.applyHsv()
     return this
   }
   rotateValue(value: number): object {
-    this.value = Util.clamp(this.value + value, 0, 100)
+    this.value = util.clamp(this.value + value, 0, 100)
     this.applyHsv()
     return this
   }
