@@ -1,12 +1,12 @@
 import { c } from './canvas.js'
-import Global from './global.js'
+import global from './global.js'
 import Interaction from './interaction.js'
 
 Interaction.settings.get('mouse').set('preventDefault', true)
 Interaction.settings.get('mouse').set('dispatchAfterRelease', true)
 Interaction.settings.get('mouse').set('scrollSpeed', 15)
 
-if (!Global.mobile) {
+if (!global.mobile) {
   Interaction.editEvent('mousedown').bind('default')
   Interaction.editEvent('mouseup').bind('default')
   Interaction.editEvent('mousemove').bind('default')

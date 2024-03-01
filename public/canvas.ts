@@ -1,4 +1,4 @@
-import Global from './global.js'
+import global from './global.js'
 
 interface Size {
   width: number,
@@ -55,5 +55,5 @@ const Canvas = class {
 export const canvas = document.getElementById('canvas') as HTMLCanvasElement
 export const c = new Canvas(canvas)
 
-Global.canvas = c
-Global.ctx = c.ctx
+global.canvas = c
+global.ctx = c.ctx
