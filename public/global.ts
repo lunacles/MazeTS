@@ -4,18 +4,29 @@ interface FontConfig {
   size: number,
 }
 
-namespace Global {
-  export let canvas: object
-  export let ctx: CanvasRenderingContext2D
-  export const debug = true
-  export const mobile = 'ontouchstart' in document.body && /android|mobi/i.test(navigator.userAgent)
-  export const fontConfig: FontConfig = {
+interface Global {
+  canvas: object | undefined
+  ctx: CanvasRenderingContext2D | undefined
+  debug: boolean
+  mobile: boolean
+  fontConfig: FontConfig
+  font: string
+  fontFromSize: Function
+}
+
+const global: Global = {
+  canvas: null,
+  ctx: null,
+  debug: true,
+  mobile: 'ontouchstart' in document.body && /android|mobi/i.test(navigator.userAgent),
+  fontConfig: {
     family: 'Ubuntu',
     style: 'bold',
     size: 16,
-  }
-  export const font = `${fontConfig.style} ${fontConfig.size}px ${fontConfig.family}`
-  export const fontFromSize = (size: number): string => `${fontConfig.style} ${size}px ${fontConfig.family}`
+  },
+  font: '',
+  fontFromSize: (size: number): string => `${global.fontConfig.style} ${size}px ${global.fontConfig.family}`,
 }
+global.font = global.fontFromSize(global.fontConfig.size)
 
-export default Global
+export default global
