@@ -1,6 +1,6 @@
 import * as util from './util.js'
 
-type color = typeof Color | Array<number> | string
+type color = typeof Color | Array<number> | string | object
 
 const Color = class {
   public static hexToRgb(hex: color): object {
@@ -13,7 +13,7 @@ const Color = class {
   }
   public static rgbToHex(rgb: color): string {
     if (!Array.isArray(rgb) || rgb.length !== 3) throw new Error('Invalid rgb code.')
-    return rgb.reduce((a, b): string => a + (b | 256).toString(16).slice(1), '#')
+    return `#${rgb.reduce((a, b): any => (a + (b | 256).toString(16).slice(1)), 0).slice(1)}`
   }
   public static blend(color1: color, color2: color, weight2: number): object {
     let c1 = color1 instanceof Color ? color1 : new Color(color1)
