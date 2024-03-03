@@ -13,6 +13,8 @@ const Colors = {
   darkGray: new Color('#333747'),
   gray: new Color('#b2b2b2'),
   red: new Color('#de7076'),
+
+  wall: new Color('#999999'),
 }
 
 export default Colors
