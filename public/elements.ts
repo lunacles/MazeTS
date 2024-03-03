@@ -2,7 +2,7 @@ import Global from './global.js'
 import Color from './color.js'
 import { c, canvas } from './canvas.js'
 
-type CacheType = 'bar' | 'text' | null
+type CacheType = 'bar' | 'text' | 'rect' | null
 type Radii = Array<number> | number
 type ClipType = 'circle' | 'rect'
 type Pair = [number, number]
