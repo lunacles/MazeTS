@@ -59,9 +59,6 @@ const Document = {
       Interaction.mouse.targetScroll -= Interaction.mouse.targetScroll * smoothFix
     }
 
-    if (Interaction.mouse.left)
-      console.log('a')
-
     Interaction.reset()
   },
 }
