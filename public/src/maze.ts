@@ -164,7 +164,6 @@ export const Maze = class MazeInterface {
         width: maxSize, height: maxSize,
       })
     } while ([].concat(...this.entries().filter(([x, y, r]) => r)).length > 0)
-    console.log(this)
     return this
   }
   public mergeWalls(): this {

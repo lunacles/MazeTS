@@ -162,7 +162,6 @@ export const Walker = class WalkerInterface {
     if (direction & Direction.Down)
       y += 1
 
-      console.log([x, y], direction)
     return [x, y]
   }
   private validateCell(x?: number, y?: number): boolean {
@@ -186,7 +185,6 @@ export const Walker = class WalkerInterface {
     let traveledCells: Array<Coordinate> = [{ x: this.x, y: this.y }]
 
     // get our starting direction
-    console.log(this.startDirection)
     let direction: Direction = Array.isArray(this.startDirection) ? this.ran.fromArray(this.startDirection) : this.startDirection
     // convert the direction to a pair
     let dir: Pair = this.directionToPair(direction)

@@ -50,7 +50,6 @@ export const RandomWalker = class RandomWalkerInterface {
     this.place()
     //this.walk()
     for (let seed of this.seeds) {
-      console.log('a')
       let walker = new Walker({
         setup: {
           x: seed.x,
@@ -79,7 +78,6 @@ export const RandomWalker = class RandomWalkerInterface {
       })
       for (let { x, y } of walker.walk()) {
         this.maze.set(x, y, +!this.maze.inverse)
-        console.log(x, y)
       }
     }
   }

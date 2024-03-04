@@ -18,7 +18,6 @@ const maze = new Maze({
   turnChance: 0.2,
   straightChance: 0.6,
 })).findPockets().mergeWalls()
-console.log(maze.array)
 const map = new Map(maze)
 
 let time = 0
