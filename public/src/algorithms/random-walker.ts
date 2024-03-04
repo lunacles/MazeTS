@@ -1,12 +1,14 @@
 import {
   MazeInterface,
-  Direction
 } from '../maze.js'
 import {
   RandomInterface,
 } from '../random/random.js'
+import {
+  Walker,
+  MovementOptions,
+} from '../walker.js'
 
-type Pair = [number, number]
 type Coordinate = {
   x: number,
   y: number,
@@ -46,7 +48,40 @@ export const RandomWalker = class RandomWalkerInterface {
   }
   public init(): void {
     this.place()
-    this.walk()
+    //this.walk()
+    for (let seed of this.seeds) {
+      console.log('a')
+      let walker = new Walker({
+        setup: {
+          x: seed.x,
+          y: seed.y,
+          maze: this.maze,
+          ran: this.ran,
+        },
+        chances: {
+          straightChance: this.straightChance,
+          turnChance: this.turnChance,
+          branchChance: 0,
+        },
+        instructions: {
+          startDirection: [...MovementOptions.vertical, ...MovementOptions.horizontal],
+          branchDirections: [...MovementOptions.vertical, ...MovementOptions.horizontal],
+        },
+        settings: {
+          borderWrapping: false,
+          terminateOnContact: false,
+        },
+        limits: {
+          maxLength: Infinity,
+          maxTurns: Infinity,
+          maxBranches: Infinity,
+        }
+      })
+      for (let { x, y } of walker.walk()) {
+        this.maze.set(x, y, +!this.maze.inverse)
+        console.log(x, y)
+      }
+    }
   }
   private validateCell(position: Coordinate): boolean {
     //if (this.map.get(position.x, position.y) === (this.type + 0) % 2) return false
@@ -69,6 +104,7 @@ export const RandomWalker = class RandomWalkerInterface {
       }
     }
   }
+  /*
   private walk(): void {
     let perpendicular = ([x, y]: Pair): Array<Pair> => [[y, -x], [-y, x]]
     for (let seed of this.seeds) {
@@ -98,4 +134,5 @@ export const RandomWalker = class RandomWalkerInterface {
       }
     }
   }
+  */
 }
