@@ -12,14 +12,6 @@ import {
 export type Seed = string | number
 type Pair = [number, number]
 
-export enum Direction {
-  None = 0,  // 0000
-  Left = 1,  // 0001
-  Right = 2, // 0010
-  Up = 4,    // 0100
-  Down = 8,  // 1000
-}
-
 type Algorithm = RandomWalkerInterface
 
 export interface Wall {
@@ -55,7 +47,6 @@ export interface MazeInterface {
   findPockets: () => void
   combineWalls: () => void
   mergeWalls: () => void
-  randomDirection: (directions: Array<Direction>) => Pair
 }
 
 export const Maze = class MazeInterface {
@@ -93,7 +84,7 @@ export const Maze = class MazeInterface {
   public get(x: number, y: number): any {
     return this.array[y * this.width + x]
   }
-  public set(x: number, y: number, value: any): any {
+  public set(x: number, y: number, value: any): void {
     this.array[y * this.width + x] = value
   }
   public entries(): Array<any> {
@@ -102,7 +93,7 @@ export const Maze = class MazeInterface {
   public has(x: number, y: number): boolean {
     return x > 0 && x < this.width - 1 && y > 0 && y < this.height - 1
   }
-  public findPockets(): void {
+  public findPockets(): this {
     let queue: Array<Pair> = [[0, 0]]
     this.set(0, 0, 2)
 
@@ -129,6 +120,7 @@ export const Maze = class MazeInterface {
       if (r === 0)
         this.set(x, y, 1)
     }
+    return this
   }
   // placeWalls() {
   //   // For debug purposes
@@ -142,7 +134,7 @@ export const Maze = class MazeInterface {
   //   for (let { x, y, width, height } of this.walls)
   //     Page.cell(x, y, width, height, 'wall')
   // }
-  public combineWalls(): void {
+  public combineWalls(): this {
     do {
       let best: Pair
       let maxSize = 0
@@ -161,7 +153,7 @@ export const Maze = class MazeInterface {
           best = [x, y]
         }
       }
-      if (!best) return
+      if (!best) break
       for (let y = 0; y < maxSize; y++) {
         for (let x = 0; x < maxSize; x++) {
           this.set(best[0] + x, best[1] + y, 0)
@@ -172,8 +164,10 @@ export const Maze = class MazeInterface {
         width: maxSize, height: maxSize,
       })
     } while ([].concat(...this.entries().filter(([x, y, r]) => r)).length > 0)
+    console.log(this)
+    return this
   }
-  public mergeWalls(): void {
+  public mergeWalls(): this {
     for (let x = 0; x < this.width; x++) {
       for (let y = 0; y < this.height; y++) {
         if (this.get(x, y) !== 1) continue
@@ -200,22 +194,7 @@ export const Maze = class MazeInterface {
         this.walls.push(chunk)
       }
     }
-  }
-  public randomDirection(directions: Array<Direction>): Pair {
-    let dir: Direction = this.ran.fromArray(directions)
-    let x = 0
-    let y = 0
-
-    if (dir & Direction.Left)
-      x -= 1
-    if (dir & Direction.Right)
-      x += 1
-    if (dir & Direction.Up)
-      y -= 1
-    if (dir & Direction.Down)
-      y += 1
-
-    return [x, y]
+    return this
   }
   public runAlgorithm(algorithm: Algorithm): this {
     algorithm.maze = this
