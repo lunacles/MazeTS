@@ -89,22 +89,22 @@ const Color = class {
     this.saturation = (max === 0 ? 0 : d / max) * 100
     this.value = max * 100
   }
-  public rotateHue(hue: number): object {
+  public rotateHue(hue: number): this {
     this.hue = util.clamp(this.hue + hue, 0, 100)
     this.applyHsv()
     return this
   }
-  rotateSaturation(saturation: number): object {
+  public rotateSaturation(saturation: number): this {
     this.saturation = util.clamp(this.saturation + saturation, 0, 100)
     this.applyHsv()
     return this
   }
-  rotateValue(value: number): object {
+  public rotateValue(value: number): this {
     this.value = util.clamp(this.value + value, 0, 100)
     this.applyHsv()
     return this
   }
-  applyHsv(): void {
+  private applyHsv(): void {
     let i: number = Math.floor(this.hue / 60)
     let f: number = this.hue / 60 - i
     let p: number = this.value * (1 - this.saturation)
