@@ -2,46 +2,14 @@ import { MazeInterface } from './maze'
 import {
   RandomInterface
 } from './random/random.js'
+import Global from './../global.js'
 
 type Pair = [number, number]
 type Coordinate = {
   x: number,
   y: number,
 }
-
-enum Direction {
-  Random = 0, // 0000
-  Left = 1,   // 0001
-  Right = 2,  // 0010
-  Up = 4,     // 0100
-  Down = 8,   // 1000
-}
-
-enum DiagnalDirections {
-  UpLeft = Direction.Left | Direction.Up,
-  DownLeft = Direction.Left | Direction.Down,
-  UpRight = Direction.Right | Direction.Up,
-  DownRight = Direction.Right | Direction.Down
-}
-
-export const MovementOptions = {
-  all: [
-    Direction.Left, Direction.Right,
-    Direction.Up, Direction.Down,
-    DiagnalDirections.UpLeft, DiagnalDirections.UpRight,
-    DiagnalDirections.DownLeft, DiagnalDirections.DownRight,
-  ],
-  diagnal: [
-    DiagnalDirections.UpLeft, DiagnalDirections.UpRight,
-    DiagnalDirections.DownLeft, DiagnalDirections.DownRight,
-  ],
-  vertical: [
-    Direction.Up, Direction.Down
-  ],
-  horizontal: [
-    Direction.Left, Direction.Right
-  ],
-}
+type Movement = Array<number> | number
 
 interface WalkerSetup {
   x: number
@@ -57,8 +25,8 @@ interface WalkerChances {
 }
 
 interface WalkerInstructions {
-  startDirection: Array<Direction> | Direction
-  branchDirections: Array<Direction>
+  startDirections: Movement
+  branchDirections: Movement
 }
 
 interface WalkerLimits {
@@ -109,8 +77,8 @@ export const Walker = class WalkerInterface {
   private turnChance: number
   private branchChance: number
 
-  private startDirection: Array<Direction> | Direction
-  private branchDirections: Array<Direction>
+  private startDirections: Movement
+  private branchDirections: Movement
 
   private borderWrapping: boolean
   private terminateOnContact: boolean
@@ -136,7 +104,7 @@ export const Walker = class WalkerInterface {
     this.turnChance = chances.turnChance
     this.branchChance = chances.branchChance
 
-    this.startDirection = instructions.startDirection
+    this.startDirections = instructions.startDirections
     this.branchDirections = instructions.branchDirections
 
     this.borderWrapping = settings.borderWrapping
@@ -149,17 +117,17 @@ export const Walker = class WalkerInterface {
     this.turns = 0
     this.branches = 0
   }
-  public directionToPair(direction: Direction): Pair {
+  public directionToPair(direction: number): Pair {
     let x = 0
     let y = 0
 
-    if (direction & Direction.Left)
+    if (direction & Global.direction.left)
       x -= 1
-    if (direction & Direction.Right)
+    if (direction & Global.direction.right)
       x += 1
-    if (direction & Direction.Up)
+    if (direction & Global.direction.up)
       y -= 1
-    if (direction & Direction.Down)
+    if (direction & Global.direction.down)
       y += 1
 
     return [x, y]
@@ -170,10 +138,12 @@ export const Walker = class WalkerInterface {
     return true
   }
   private wrap(x?: number, y?: number): Coordinate {
-    let wx = x ?? this.x === 0 ? this.maze.width - 1 : x ?? this.x === this.maze.width - 1 ? 0 : x ?? this.x
-    let wy = y ?? this.y === 0 ? this.maze.height - 1 : y ?? this.y === this.maze.height - 1 ? 1 : y ?? this.y
+    let ix = x ?? this.x
+    let iy = y ?? this.y
+    let wx = ix === 0 ? this.maze.width - 2 : ix === this.maze.width - 1 ? 1 : ix
+    let wy = iy === 0 ? this.maze.height - 2 : iy === this.maze.height - 1 ? 1 : iy
 
-    if (!x || !y) {
+    if (x || y) {
       return { x: wx, y: wy, }
     } else {
       this.x = wx
@@ -185,7 +155,7 @@ export const Walker = class WalkerInterface {
     let traveledCells: Array<Coordinate> = [{ x: this.x, y: this.y }]
 
     // get our starting direction
-    let direction: Direction = Array.isArray(this.startDirection) ? this.ran.fromArray(this.startDirection) : this.startDirection
+    let direction: number = Array.isArray(this.startDirections) ? this.ran.fromArray(this.startDirections) : this.startDirections
     // convert the direction to a pair
     let dir: Pair = this.directionToPair(direction)
     // choose a perpendicular direction for either our turn or branch to use
@@ -216,25 +186,28 @@ export const Walker = class WalkerInterface {
         // wrap the branch if we allow it
         if (this.borderWrapping && !this.maze.has(this.x + dx, this.y + dy)) {
           let wrap = this.wrap(this.x + dx, this.y + dy)
+          console.log(this.x + dx, this.y + dy, wrap)
           dx = wrap.x
           dy = wrap.y
 
         // terminate if we don't allow wrapping & branch cell is not valid
-        } else if (this.validateCell(this.x + dx, this.y + dy)) {
+        } else if (!this.validateCell(this.x + dx, this.y + dy)) {
           break
+        } else {
+          dx += this.x
+          dy += this.y
         }
-
         // create a new walker for the branch
         let branch = new Walker({
           setup: {
-            x: this.x + dx,
-            y: this.y + dy,
+            x: dx,
+            y: dy,
             maze: this.maze,
             ran: this.ran,
           },
           chances: this.chances,
           instructions: {
-            startDirection: direction,
+            startDirections: direction,
             branchDirections: this.branchDirections,
           },
           settings: this.settings,
