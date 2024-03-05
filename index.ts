@@ -5,19 +5,23 @@ import {
   RandomWalker
 } from './public/src/algorithms/random-walker.js'
 import { PRNG } from './public/src/random/prng.js'
-import { Hash } from './public/src/random/hash.js'
+//import { Hash } from './public/src/random/hash.js'
+
+import Global from './public/global.js'
 
 import Map from './public/components/map.js'
 
-const maze = new Maze({
-  width: 32,
-  height: 32,
-  prng: PRNG.MathRandom//PRNG.simple(Hash.cyrb53('lolxd'))
-}).runAlgorithm(new RandomWalker({
-  seedAmount: 75,
-  turnChance: 0.2,
-  straightChance: 0.6,
-})).findPockets().mergeWalls()
+const maze = new Maze(32, 32, PRNG.MathRandom, true)
+  .setWalkerChances(0.6, 0.2, 0)
+  .setWalkerInstructions(
+    [...Global.movementOptions.horizontal as Array<number>, ...Global.movementOptions.vertical as Array<number>],
+  )
+  .setWalkerSettings(true, false)
+  .setWalkerLimits(Infinity, Infinity, 20)
+  .runAlgorithm(new RandomWalker(250, false))
+  .findPockets()
+  .mergeWalls()
+
 const map = new Map(maze)
 
 let time = 0
