@@ -8,11 +8,13 @@ import {
 import {
   RandomWalkerInterface,
 } from './algorithms/random-walker.js'
+import Global from './../global.js'
 
 export type Seed = string | number
 type Pair = [number, number]
 
 type Algorithm = RandomWalkerInterface
+type Movement = Array<number> | number
 
 export interface Wall {
   x: number
@@ -21,12 +23,47 @@ export interface Wall {
   height: number
 }
 
-interface MazeConfig {
-  width: number
-  height: number
-  //mazeSeed: Seed
-  prng: Function
-  inverse?: boolean
+interface WalkerChances {
+  straightChance: number,
+  turnChance: number,
+  branchChance: number,
+}
+
+interface WalkerInstructions {
+  startDirections: Array<number> | number,
+  branchDirections: Array<number> | number,
+}
+
+interface WalkerSettings {
+  borderWrapping: boolean,
+  terminateOnContact: boolean,
+}
+
+interface WalkerLimits {
+  maxLength: number,
+  maxTurns: number,
+  maxBranches: number,
+}
+
+const defaultWalkerChances: WalkerChances = {
+  straightChance: 0.6,
+  turnChance: 0.2,
+  branchChance: 0,
+}
+const defaultWalkerInstructions: WalkerInstructions = {
+  startDirections: [...Global.movementOptions.horizontal as Array<number>, ...Global.movementOptions.vertical as Array<number>],
+  branchDirections: [...Global.movementOptions.horizontal as Array<number>, ...Global.movementOptions.vertical as Array<number>],
+}
+
+const defaultWalkerSettings: WalkerSettings = {
+  borderWrapping: false,
+  terminateOnContact: false,
+}
+
+const defaultWalkerLimits: WalkerLimits = {
+  maxLength: Infinity,
+  maxTurns: Infinity,
+  maxBranches: Infinity,
 }
 
 export interface MazeInterface {
@@ -39,6 +76,11 @@ export interface MazeInterface {
   walls: Array<Wall>
   alreadyPlaced: Array<any>
   ran: RandomInterface
+
+  walkerChances: WalkerChances
+  walkerInstructions: WalkerInstructions
+  walkerSettings: WalkerSettings
+  walkerLimits: WalkerLimits
 
   get: (x: number, y: number) => any
   set: (x: number, y: number, value: any) => any
@@ -59,7 +101,12 @@ export const Maze = class MazeInterface {
   public walls: Array<Wall>
   public alreadyPlaced: Array<any>
   public ran: RandomInterface
-  constructor({ width = 0, height = 0, /*mazeSeed = '',*/ prng = PRNG.MathRandom, inverse = false }: MazeConfig) {
+
+  public walkerChances: WalkerChances
+  public walkerInstructions: WalkerInstructions
+  public walkerSettings: WalkerSettings
+  public walkerLimits: WalkerLimits
+  constructor(width: number, height: number, prng: Function = PRNG.MathRandom, inverse: boolean) {
     this.width = width
     this.height = height
     this.array = Array(width * height).fill(+inverse)
@@ -116,24 +163,20 @@ export const Maze = class MazeInterface {
       }
     }
 
-    for (let [x, y, r] of this.entries()) {
-      if (r === 0)
-        this.set(x, y, 1)
+    try {
+      console.log(this.entries(), this.array)
+      for (let [x, y, r] of this.entries()) {
+        if (r === 0)
+          this.set(x, y, 1)
+      }
+    } catch (err) {
+      console.error(err)
+      throw new Error()
     }
+
     return this
   }
-  // placeWalls() {
-  //   // For debug purposes
-  //   /*for (let [x, y, r] of this.entries()) {
-  //     if (r === 1) {
-  //       Page.cell(x, y, 1, 1, 'wall')
-  //     } else if (r === 0) {
-  //       Page.cell(x, y, 1, 1, 'pocket')
-  //     }
-  //   }*/
-  //   for (let { x, y, width, height } of this.walls)
-  //     Page.cell(x, y, width, height, 'wall')
-  // }
+
   public combineWalls(): this {
     do {
       let best: Pair
@@ -192,6 +235,36 @@ export const Maze = class MazeInterface {
         }
         this.walls.push(chunk)
       }
+    }
+    return this
+  }
+  public setWalkerChances(straightChance?: number, turnChance?: number, branchChance?: number): this {
+    this.walkerChances = {
+      straightChance: straightChance ?? defaultWalkerChances.straightChance,
+      turnChance: turnChance ?? defaultWalkerChances.turnChance,
+      branchChance: branchChance ?? defaultWalkerChances.branchChance,
+    }
+    return this
+  }
+  public setWalkerInstructions( startDirection?: Movement, branchDirection?: Movement): this {
+    this.walkerInstructions = {
+      startDirections: startDirection ?? defaultWalkerInstructions.startDirections,
+      branchDirections: branchDirection ?? defaultWalkerInstructions.branchDirections,
+    }
+    return this
+  }
+  public setWalkerSettings(borderWrapping?: boolean, terminateOnContact?: boolean): this {
+    this.walkerSettings = {
+      borderWrapping: borderWrapping ?? defaultWalkerSettings.borderWrapping,
+      terminateOnContact: terminateOnContact ?? defaultWalkerSettings.terminateOnContact,
+    }
+    return this
+  }
+  public setWalkerLimits(maxLength?: number, maxTurns?: number, maxBranches?: number): this {
+    this.walkerLimits = {
+      maxLength: maxLength ?? defaultWalkerLimits.maxLength,
+      maxTurns: maxTurns ?? defaultWalkerLimits.maxTurns,
+      maxBranches: maxBranches ?? defaultWalkerLimits.maxBranches,
     }
     return this
   }
