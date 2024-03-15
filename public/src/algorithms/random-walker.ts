@@ -7,6 +7,7 @@ import {
 import {
   Walker,
 } from '../walker.js'
+import Visualizer from '../visualizer.js'
 
 type Coordinate = {
   x: number,
@@ -20,7 +21,7 @@ export interface RandomWalkerInterface {
   turnChance: number
   straightChance: number
   ran: RandomInterface
-  init: () => void
+  init: () => Promise<void>
 }
 
 export const RandomWalker = class RandomWalkerInterface {
@@ -42,8 +43,8 @@ export const RandomWalker = class RandomWalkerInterface {
 
     this.seeds = []
   }
-  public init(): void {
-    this.place()
+  public async init(): Promise<void> {
+    await this.place()
     //this.walk()
     for (let seed of this.seeds) {
       let walker = new Walker({
@@ -58,16 +59,14 @@ export const RandomWalker = class RandomWalkerInterface {
         settings: this.maze.walkerSettings,
         limits: this.maze.walkerLimits
       })
-      for (let { x, y } of walker.walk()) {
-        this.maze.set(x, y, this.type)
-      }
+      await walker.walk(this.type)
     }
   }
   private validateCell(position: Coordinate): boolean {
     if (!this.maze.has(position.x, position.y)) return false
     return true
   }
-  private place(): void {
+  private async place(): Promise<void> {
     let amount = 0
     for (let i = 0; i < 1e3; i++) {
       let loc: Coordinate = {
@@ -78,7 +77,9 @@ export const RandomWalker = class RandomWalkerInterface {
       if (this.validateCell(loc)) {
         this.seeds.push(loc)
         this.maze.set(loc.x, loc.y, this.type)
+        this.maze.mergeWalls()
         amount++
+        await Visualizer.sleep(15)
         if (amount >= this.seedAmount) break
       }
     }

@@ -110,6 +110,7 @@ export const Maze = class MazeInterface {
     this.width = width
     this.height = height
     this.array = Array(width * height).fill(+inverse)
+    this.walls = []
     for (let [x, y, _] of this.entries().filter(([x, y, r]) => !this.has(x, y)))
       this.set(x, y, 0)
 
@@ -124,8 +125,6 @@ export const Maze = class MazeInterface {
     }
     */
     this.ran = new Random(prng)
-
-    this.walls = []
     this.alreadyPlaced = []
   }
   public get(x: number, y: number): any {
@@ -164,7 +163,6 @@ export const Maze = class MazeInterface {
     }
 
     try {
-      console.log(this.entries(), this.array)
       for (let [x, y, r] of this.entries()) {
         if (r === 0)
           this.set(x, y, 1)
@@ -178,6 +176,8 @@ export const Maze = class MazeInterface {
   }
 
   public combineWalls(): this {
+    let walls: Array<Wall> = []
+    let array = this.array.slice()
     do {
       let best: Pair
       let maxSize = 0
@@ -202,26 +202,30 @@ export const Maze = class MazeInterface {
           this.set(best[0] + x, best[1] + y, 0)
         }
       }
-      this.walls.push({
+      walls.push({
         x: best[0], y: best[1],
         width: maxSize, height: maxSize,
       })
     } while ([].concat(...this.entries().filter(([x, y, r]) => r)).length > 0)
+    this.walls = walls
+    this.array = array
     return this
   }
   public mergeWalls(): this {
+    let walls: Array<Wall> = []
+    let array = this.array.slice()
     for (let x = 0; x < this.width; x++) {
       for (let y = 0; y < this.height; y++) {
         if (this.get(x, y) !== 1) continue
         let chunk: Wall = {
           x, y,
-          width: 0, height: 1
+          width: 1, height: 1
         }
         while (this.get(x + chunk.width, y) === 1) {
           this.set(x + chunk.width, y, 0)
           chunk.width++
 
-          this.walls.push(chunk)
+          walls.push(chunk)
         }
         outer: while (true) {
           for (let i = 0; i < chunk.width; i++) {
@@ -231,11 +235,13 @@ export const Maze = class MazeInterface {
             this.set(x + i, y + chunk.height, 0)
           chunk.height++
 
-          this.walls.push(chunk)
+          walls.push(chunk)
         }
-        this.walls.push(chunk)
+        walls.push(chunk)
       }
     }
+    this.walls = walls
+    this.array = array
     return this
   }
   public setWalkerChances(straightChance?: number, turnChance?: number, branchChance?: number): this {
@@ -268,10 +274,9 @@ export const Maze = class MazeInterface {
     }
     return this
   }
-  public runAlgorithm(algorithm: Algorithm): this {
+  public runAlgorithm(algorithm: Algorithm): void {
     algorithm.maze = this
     algorithm.ran = this.ran
     algorithm.init()
-    return this
   }
 }

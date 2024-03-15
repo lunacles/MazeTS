@@ -1,8 +1,9 @@
-import { MazeInterface } from './maze'
+import { MazeInterface } from './maze.js'
 import {
   RandomInterface
 } from './random/random.js'
 import Global from './../global.js'
+import Visualizer from './visualizer.js'
 
 type Pair = [number, number]
 type Coordinate = {
@@ -58,7 +59,7 @@ export interface WalkerInterface {
   y: number
   maze: MazeInterface
   ran: number
-  walk: () => Array<Coordinate>,
+  walk: (type: number) => Promise<void>,
 }
 
 export const Walker = class WalkerInterface {
@@ -150,9 +151,9 @@ export const Walker = class WalkerInterface {
       this.y = wy
     }
   }
-  public walk(): Array<Coordinate> {
+  public async walk(type: number): Promise<void> {
     let perpendicular = ([x, y]: Pair): Array<Pair> => [[y, -x], [-y, x]]
-    let traveledCells: Array<Coordinate> = [{ x: this.x, y: this.y }]
+    //let traveledCells: Array<Coordinate> = [{ x: this.x, y: this.y }]
 
     // get our starting direction
     let direction: number = Array.isArray(this.startDirections) ? this.ran.fromArray(this.startDirections) : this.startDirections
@@ -186,7 +187,6 @@ export const Walker = class WalkerInterface {
         // wrap the branch if we allow it
         if (this.borderWrapping && !this.maze.has(this.x + dx, this.y + dy)) {
           let wrap = this.wrap(this.x + dx, this.y + dy)
-          console.log(this.x + dx, this.y + dy, wrap)
           dx = wrap.x
           dy = wrap.y
 
@@ -217,8 +217,7 @@ export const Walker = class WalkerInterface {
             maxBranches: this.maxBranches - this.branches
           }
         })
-        traveledCells.push(...branch.walk())
-
+        await branch.walk(type)
       // terminate if all chances fail
       } else {
         break
@@ -226,12 +225,13 @@ export const Walker = class WalkerInterface {
       if (this.borderWrapping)
         this.wrap()
       if (this.validateCell()) {
-        traveledCells.push({ x: this.x, y: this.y })
+        this.maze.set(this.x, this.y, type)
+        this.maze.mergeWalls()
+        await Visualizer.sleep()
       } else {
         break
       }
     }
-    return traveledCells
+    await Visualizer.sleep()
   }
 }
-
