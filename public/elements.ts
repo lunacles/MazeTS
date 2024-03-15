@@ -371,7 +371,7 @@ interface Text {
 }
 
 export const Text = class extends Element {
-  public static draw({ x = 0, y = 0, size = 0, text = '', align = 'center' as CanvasTextAlign, style = global.font.style, family = global.font.family }: Text) {
+  public static draw({ x = 0, y = 0, size = 0, text = '', align = 'center' as CanvasTextAlign, style = Global.fontConfig.style, family = Global.fontConfig.family }: Text) {
     return new Text(x, y, size, text, align, style, family)
   }
   private x: number
