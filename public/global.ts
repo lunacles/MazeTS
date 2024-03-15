@@ -52,6 +52,7 @@ interface Global {
   direction: Direction
   diagonalDirection: DiagonalDirection
   movementOptions: MovementOptions
+  visualizerSpeed: number
 }
 
 const global: Global = {
@@ -85,7 +86,8 @@ const global: Global = {
     horizontal: [
       Direction.left, Direction.right
     ],
-  }
+  },
+  visualizerSpeed: 15,
 }
 global.font = global.fontFromSize(global.fontConfig.size)
 
