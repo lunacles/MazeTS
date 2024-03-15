@@ -10,19 +10,19 @@ import { PRNG } from './public/src/random/prng.js'
 import Global from './public/global.js'
 
 import Map from './public/components/map.js'
+import { Hash } from './public/src/random/hash.js'
 
-const maze = new Maze(32, 32, PRNG.MathRandom, true)
+const maze = new Maze(32, 32, PRNG.simple(Hash.cyrb53('maze')), false)
   .setWalkerChances(0.6, 0.2, 0)
-  .setWalkerInstructions(
-    [...Global.movementOptions.horizontal as Array<number>, ...Global.movementOptions.vertical as Array<number>],
-  )
+  .setWalkerInstructions([
+    ...Global.movementOptions.horizontal as Array<number>,
+    ...Global.movementOptions.vertical as Array<number>,
+  ])
   .setWalkerSettings(true, false)
   .setWalkerLimits(Infinity, Infinity, 20)
-  .runAlgorithm(new RandomWalker(250, false))
-  .findPockets()
-  .mergeWalls()
 
 const map = new Map(maze)
+maze.runAlgorithm(new RandomWalker(75, true))
 
 let time = 0
 let tick = 0
