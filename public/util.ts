@@ -7,8 +7,6 @@ export const averageArray = (array: Array<number>): number => array.length ? arr
 
 export const sumArray = (array: Array<number>): number => array.reduce((a, b): number => a + b, 0)
 
-export const sleep = (ms: number): Promise<object> => new Promise(r => setTimeout(r, ms))
-
 export const measureText = (text: string, size: number): TextMetrics => {
   global.ctx.font = global.fontFromSize(size)
   return global.ctx.measureText(text)
