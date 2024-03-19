@@ -136,7 +136,7 @@ export const RandomWalker = class RandomWalkerInterface {
         this.maze.set(loc.x, loc.y, this.type)
         this.maze.mergeWalls()
         amount++
-        await Visualizer.sleep(15)
+        await Visualizer.sleep()
         if (amount >= this.seedAmount) break
       }
     }
