@@ -9,11 +9,14 @@ import {
   ImprovedNoise,
   ImprovedNoiseInterface,
 } from '../perlin-noise.js'
+import * as util from '../../util.js'
+import Log from '../../log.js'
 
 type Coordinate = {
   x: number,
   y: number,
 }
+type Setting = 'zoom' | 'threshold' | 'min' | 'max' | 'iterations'
 type NoiseAlgorithms = 'normal' | 'clamped' | 'quantized' | 'dynamic' | 'domainWarped' | 'multiScale' | 'marble'
 
 export interface NoiseInterface {
@@ -34,6 +37,14 @@ export interface NoiseInterface {
   marble: () => Promise<this>
 }
 
+enum DefaultSettings {
+  Zoom = 1,
+  Threshold = 0.1,
+  Min = -0.085,
+  Max = 0.085,
+  Iterations = 1,
+}
+
 export const Noise = class NoiseInterface {
   public maze: MazeInterface
   public ran: RandomInterface
@@ -50,24 +61,16 @@ export const Noise = class NoiseInterface {
     this.ran = null
     this.type = type
 
-    this.zoom = 1
-    this.threshold = 0.1
-    this.min = -0.085
-    this.max = 0.085
-    this.iterations = 1
+    this.zoom = DefaultSettings.Zoom
+    this.threshold = DefaultSettings.Threshold
+    this.min = DefaultSettings.Min
+    this.max = DefaultSettings.Max
+    this.iterations = DefaultSettings.Iterations
   }
   public async init(): Promise<void> {
-    console.log(this.maze)
-
     this.perlin = new ImprovedNoise(this.ran)
 
     await this[this.type]()
-
-    for (let [x, y, _] of this.maze.entries().filter(([x, y, r]) => !this.maze.has(x, y)))
-      this.maze.set(x, y, 0)
-
-    //this.maze.findPockets()
-    this.maze.combineWalls()
   }
   private validateCell(position: Coordinate): boolean {
     if (!this.maze.has(position.x, position.y)) return false
@@ -91,28 +94,38 @@ export const Noise = class NoiseInterface {
     return this
   }
   private async iter(iterator: Function): Promise<void> {
-    for (let i: number = 0; i < this.iterations; i++) {
-      for (let y: number = 0; y < this.maze.height; y++) {
-        for (let x: number = 0; x < this.maze.width; x++) {
-          if (!this.validateCell({ x, y })) continue
+    for (let y: number = 0; y < this.maze.height; y++) {
+      for (let x: number = 0; x < this.maze.width; x++) {
+        if (!this.validateCell({ x, y })) continue
 
-          let value: any = iterator(x, y)
-          this.maze.set(x, y, +value)
-          this.maze.mergeWalls()
+        let value: any
+        value = iterator(x, y)
 
-          await Visualizer.sleep(5)
-        }
+        this.maze.set(x, y, +value)
+        this.maze.mergeWalls()
+
+        await Visualizer.sleep()
       }
     }
-
+  }
+  private warnRedundantSettings(settings: Array<Setting>): void {
+    for (let setting of settings) {
+      let cap = util.capitalize(setting)
+      if (!DefaultSettings[cap])
+        Log.warn('Invalid setting provided')
+      if (this[setting] !== DefaultSettings[cap])
+        Log.warn(`Noise setting "${setting === 'min' || setting === 'max' ? 'Clamp' : cap}" is redundant for generation type "${util.capitalize(this.type)}"`)
+    }
   }
   public async normal(): Promise<this> {
+    this.warnRedundantSettings(['max', 'min', 'threshold', 'iterations'])
     await this.iter((x: number, y: number): boolean => {
       return this.perlin.noise(x / this.zoom, y / this.zoom, 0) > 0
     })
     return this
   }
   public async clamped(): Promise<this> {
+    this.warnRedundantSettings(['threshold', 'iterations'])
     await this.iter((x: number, y: number): boolean => {
       let noise: number = this.perlin.noise(x / this.zoom, y / this.zoom, 0)
       return noise < this.max && noise > this.min
@@ -120,6 +133,7 @@ export const Noise = class NoiseInterface {
     return this
   }
   public async quantized(): Promise<this> {
+    this.warnRedundantSettings(['max', 'min', 'iterations'])
     await this.iter((x: number, y: number): number => {
       let noise: number = this.perlin.noise(x / this.zoom, y / this.zoom, 0)
       return this.perlin.quantize(noise, this.threshold)
@@ -127,6 +141,7 @@ export const Noise = class NoiseInterface {
     return this
   }
   public async domainWarped(): Promise<this> {
+    this.warnRedundantSettings(['max', 'min', 'threshold', 'iterations'])
     await this.iter((x: number, y: number): boolean => {
       let warp = this.perlin.domainWarp(x / this.zoom, y / this.zoom, 0)
       return this.perlin.noise(warp.x, warp.y, 0) > 0
@@ -134,6 +149,7 @@ export const Noise = class NoiseInterface {
     return this
   }
   public async dynamic(): Promise<this> {
+    this.warnRedundantSettings(['max', 'min', 'iterations'])
     await this.iter((x: number, y: number): number => {
       let noise: number = this.perlin.dynamic(x / this.zoom, y / this.zoom, 0, new Date((new Date()).getTime() * 0.001))
       return this.perlin.quantize(noise, this.threshold)
@@ -141,12 +157,13 @@ export const Noise = class NoiseInterface {
     return this
   }
   public async multiScale(): Promise<this> {
+    this.warnRedundantSettings(['max', 'min', 'threshold', 'iterations'])
     await this.iter((x: number, y: number): boolean => {
       return this.perlin.multiScale(x / this.zoom, y / this.zoom, 0) > 0
     })
     return this
   }
-  public turbulence(x: number, y: number, size: number): number {
+  private turbulence(x: number, y: number, size: number): number {
     let value: number = 0
     let initialSize: number = size
 
@@ -158,6 +175,7 @@ export const Noise = class NoiseInterface {
     return 128 * value / initialSize
   }
   public async marble(): Promise<this> {
+    this.warnRedundantSettings(['max', 'min', 'threshold', 'iterations'])
     await this.iter((x: number, y: number): boolean => {
       let repetition = {
         x: 5,
