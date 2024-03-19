@@ -13,16 +13,17 @@ import Map from './public/components/map.js'
 import { Hash } from './public/src/random/hash.js'
 
 const maze = new Maze(32, 32, PRNG.simple(Hash.cyrb53('maze')), false)
-  .setWalkerChances(0.6, 0.2, 0)
-  .setWalkerInstructions([
-    ...Global.movementOptions.horizontal as Array<number>,
-    ...Global.movementOptions.vertical as Array<number>,
-  ])
-  .setWalkerSettings(true, false)
-  .setWalkerLimits(Infinity, Infinity, 20)
-
 const map = new Map(maze)
-maze.runAlgorithm(new RandomWalker(75, true))
+maze.runAlgorithm(
+  new RandomWalker(75, true)
+    .setWalkerChances(0.6, 0.2, 0)
+    .setWalkerInstructions([
+      ...Global.movementOptions.horizontal as Array<number>,
+      ...Global.movementOptions.vertical as Array<number>,
+    ])
+    .setWalkerSettings(true, false)
+    .setWalkerLimits(Infinity, Infinity, 20)
+)
 
 let time = 0
 let tick = 0
