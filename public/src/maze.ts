@@ -8,10 +8,13 @@ import {
 import {
   RandomWalkerInterface,
 } from './algorithms/random-walker.js'
+import {
+  NoiseInterface,
+} from './algorithms/noise.js'
 
 export type Seed = string | number
 type Pair = [number, number]
-type Algorithm = RandomWalkerInterface
+type Algorithm = RandomWalkerInterface | NoiseInterface
 
 export interface Wall {
   x: number
