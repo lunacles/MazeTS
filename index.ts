@@ -1,20 +1,26 @@
 import Document from './public/document.js'
 
 import { Maze } from './public/src/maze.js'
+//import {
+//  RandomWalker
+//} from './public/src/algorithms/random-walker.js'
 import {
-  RandomWalker
-} from './public/src/algorithms/random-walker.js'
+  Noise
+} from './public/src/algorithms/noise.js'
 import { PRNG } from './public/src/random/prng.js'
-//import { Hash } from './public/src/random/hash.js'
+import { Hash } from './public/src/random/hash.js'
 
-import global from './public/global.js'
+//import global from './public/global.js'
 
 import Map from './public/components/map.js'
-import { Hash } from './public/src/random/hash.js'
 
 const maze = new Maze(32, 32, PRNG.simple(Hash.cyrb53('maze')), false)
 const map = new Map(maze)
 maze.runAlgorithm(
+  new Noise('clamped')
+    .setZoom(4)
+    .setIterations(2)
+/*
   new RandomWalker(75, true)
     .setWalkerChances(0.6, 0.2, 0)
     .setWalkerInstructions([
@@ -23,6 +29,7 @@ maze.runAlgorithm(
     ])
     .setWalkerSettings(true, false)
     .setWalkerLimits(Infinity, Infinity, 20)
+*/
 )
 
 let time = 0
