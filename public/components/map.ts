@@ -38,6 +38,14 @@ const Map = class {
     let wallWidth = (width - border * 0.5) / this.maze.width
     let wallHeight = (height - border * 0.5) / this.maze.height
 
+    for (let [ix, iy, r] of this.maze.entries()) {
+      if (r !== 2) continue
+      Rect.draw({
+        x: x + ix * wallWidth, y: y + iy * wallHeight,
+        width: wallWidth, height: wallHeight
+      }).fill(Colors.red)
+    }
+
     for (let wall of this.maze.walls) {
       MazeWall.draw({
         x: x + wall.x * wallWidth, y: y + wall.y * wallHeight,
