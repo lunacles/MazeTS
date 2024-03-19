@@ -8,7 +8,7 @@ import {
   Walker,
 } from '../walker.js'
 import Visualizer from '../visualizer.js'
-import Global from '../../global.js'
+import global from '../../global.js'
 
 type Coordinate = {
   x: number,
@@ -45,8 +45,8 @@ const defaultWalkerChances: WalkerChances = {
 }
 
 const defaultWalkerInstructions: WalkerInstructions = {
-  startDirections: [...Global.movementOptions.horizontal as Array<number>, ...Global.movementOptions.vertical as Array<number>],
-  branchDirections: [...Global.movementOptions.horizontal as Array<number>, ...Global.movementOptions.vertical as Array<number>],
+  startDirections: [...global.movementOptions.horizontal as Array<number>, ...global.movementOptions.vertical as Array<number>],
+  branchDirections: [...global.movementOptions.horizontal as Array<number>, ...global.movementOptions.vertical as Array<number>],
 }
 
 const defaultWalkerSettings: WalkerSettings = {

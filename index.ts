@@ -7,7 +7,7 @@ import {
 import { PRNG } from './public/src/random/prng.js'
 //import { Hash } from './public/src/random/hash.js'
 
-import Global from './public/global.js'
+import global from './public/global.js'
 
 import Map from './public/components/map.js'
 import { Hash } from './public/src/random/hash.js'
@@ -18,8 +18,8 @@ maze.runAlgorithm(
   new RandomWalker(75, true)
     .setWalkerChances(0.6, 0.2, 0)
     .setWalkerInstructions([
-      ...Global.movementOptions.horizontal as Array<number>,
-      ...Global.movementOptions.vertical as Array<number>,
+      ...global.movementOptions.horizontal as Array<number>,
+      ...global.movementOptions.vertical as Array<number>,
     ])
     .setWalkerSettings(true, false)
     .setWalkerLimits(Infinity, Infinity, 20)

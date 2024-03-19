@@ -2,7 +2,7 @@ import { MazeInterface } from './maze.js'
 import {
   RandomInterface
 } from './random/random.js'
-import Global from './../global.js'
+import global from './../global.js'
 import Visualizer from './visualizer.js'
 
 type Pair = [number, number]
@@ -122,13 +122,13 @@ export const Walker = class WalkerInterface {
     let x = 0
     let y = 0
 
-    if (direction & Global.direction.left)
+    if (direction & global.direction.left)
       x -= 1
-    if (direction & Global.direction.right)
+    if (direction & global.direction.right)
       x += 1
-    if (direction & Global.direction.up)
+    if (direction & global.direction.up)
       y -= 1
-    if (direction & Global.direction.down)
+    if (direction & global.direction.down)
       y += 1
 
     return [x, y]

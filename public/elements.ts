@@ -1,4 +1,4 @@
-import Global from './global.js'
+import global from './global.js'
 import Color from './color.js'
 import { c, canvas } from './canvas.js'
 
@@ -38,9 +38,9 @@ export const Element = class {
   public cache: Cached
   constructor() {
     this.canvas = canvas
-    Global.canvas = this.canvas
+    global.canvas = this.canvas
     this.ctx = c.ctx
-    Global.ctx = this.ctx
+    global.ctx = this.ctx
     this.ctx.globalAlpha = 1
     this.cache = {
       type: null,
@@ -202,7 +202,7 @@ export const Element = class {
     return this
   }
   public measureText(text: string, size: number): TextMetrics {
-    this.ctx.font = Global.fontFromSize(size)
+    this.ctx.font = global.fontFromSize(size)
     return this.ctx.measureText(text)
   }
 }
@@ -371,7 +371,7 @@ interface Text {
 }
 
 export const Text = class extends Element {
-  public static draw({ x = 0, y = 0, size = 0, text = '', align = 'center' as CanvasTextAlign, style = Global.fontConfig.style, family = Global.fontConfig.family }: Text) {
+  public static draw({ x = 0, y = 0, size = 0, text = '', align = 'center' as CanvasTextAlign, style = global.fontConfig.style, family = global.fontConfig.family }: Text) {
     return new Text(x, y, size, text, align, style, family)
   }
   private x: number
@@ -396,7 +396,7 @@ export const Text = class extends Element {
   }
   private draw(): void {
     this.ctx.font = `${this.style} ${this.size}px ${this.family}`
-    Global.fontConfig.size = this.size
+    global.fontConfig.size = this.size
     this.ctx.lineCap = 'round'
     this.ctx.lineJoin = 'round'
     this.ctx.textAlign = this.align

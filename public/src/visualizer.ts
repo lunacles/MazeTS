@@ -1,4 +1,4 @@
-import Global from './../global.js'
+import global from './../global.js'
 
 interface VisualizerInterface {
   setSpeed: (ms: number) => void
@@ -7,10 +7,10 @@ interface VisualizerInterface {
 
 const Visualizer: VisualizerInterface = {
   setSpeed(ms: number): void {
-    Global.visualizerSpeed = ms
+    global.visualizerSpeed = ms
   },
   sleep(ms?: number): Promise<object> {
-    return new Promise(r => setTimeout(r, ms ?? Global.visualizerSpeed))
+    return new Promise(r => setTimeout(r, ms ?? global.visualizerSpeed))
   }
 }
 
