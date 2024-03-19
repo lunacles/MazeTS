@@ -25,12 +25,9 @@ export interface ImprovedNoiseInterface {
 export const ImprovedNoise = class ImprovedNoiseInterface {
   private p: Array<number>
   private permutation: Array<number>
-  private mutation: number
   constructor(mutation: Mutation) {
     this.p = new Array(512)
-    this.mutation = typeof mutation === 'number' ? mutation : mutation instanceof Random ? mutation.asFloat() : 0
-
-    this.permutation = Array(256).fill(0).map(() => Math.floor(255 * this.mutation))
+    this.permutation = Array(256).fill(0).map(() => Math.floor(255 * ((mutation instanceof Random ? mutation.float() : mutation) as number)))
     for (let i: number = 0; i < 256; i++)
       this.p[256 + i] = this.p[i] = this.permutation[i]
   }
