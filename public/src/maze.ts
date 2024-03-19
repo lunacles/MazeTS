@@ -11,6 +11,8 @@ import {
 import {
   NoiseInterface,
 } from './algorithms/noise.js'
+import Visualizer from './visualizer.js'
+import Log from '../log.js'
 
 export type Seed = string | number
 type Pair = [number, number]
@@ -59,19 +61,9 @@ export const Maze = class MazeInterface {
     this.height = height
     this.array = Array(width * height).fill(+inverse)
     this.walls = []
-    for (let [x, y, _] of this.entries().filter(([x, y, r]) => !this.has(x, y)))
+    for (let [x, y, _] of this.entries().filter(([x, y, _]) => !this.has(x, y)))
       this.set(x, y, 0)
 
-      /*
-    this.seed = 0
-    if (mazeSeed === '') {
-      this.seed = Math.floor(Math.random() * 2147483646)
-    } else if (/^\d+$/.test(mazeSeed.toString())) {
-      this.seed = parseInt(mazeSeed.toString())
-    } else {
-      this.seed = Hash.cyrb53(mazeSeed.toString())
-    }
-    */
     this.ran = new Random(prng)
     this.alreadyPlaced = []
   }
@@ -87,12 +79,12 @@ export const Maze = class MazeInterface {
   public has(x: number, y: number): boolean {
     return x > 0 && x < this.width - 1 && y > 0 && y < this.height - 1
   }
-  public findPockets(): this {
+  public async findPockets(): Promise<this> {
     let queue: Array<Pair> = [[0, 0]]
     this.set(0, 0, 2)
 
     let checkedIndices = new Set([0])
-    for (let i = 0; i < 5000 && queue.length > 0; i++) {
+    for (let i = 0; i < 5e3 && queue.length > 0; i++) {
       let [x, y] = queue.shift()
       for (let [nx, ny] of [
         [x - 1, y], // left
@@ -100,6 +92,7 @@ export const Maze = class MazeInterface {
         [x, y - 1], // top
         [x, y + 1], // bottom
       ]) {
+        //if (!this.has(nx, ny) || this.get(nx, ny) !== 0) continue
         if (nx < 0 || nx > this.width - 1 || ny < 0 || ny > this.height - 1) continue
         if (this.get(nx, ny) !== 0) continue
         let i = ny * this.width + nx
@@ -107,6 +100,7 @@ export const Maze = class MazeInterface {
         checkedIndices.add(i)
         queue.push([nx, ny])
         this.set(nx, ny, 2)
+        await Visualizer.sleep()
       }
     }
 
@@ -115,11 +109,11 @@ export const Maze = class MazeInterface {
         if (r === 0)
           this.set(x, y, 1)
       }
+
     } catch (err) {
-      console.error(err)
+      Log.error('Failed to fill pockets', err)
       throw new Error()
     }
-
     return this
   }
 
@@ -192,9 +186,10 @@ export const Maze = class MazeInterface {
     this.array = array
     return this
   }
-  public runAlgorithm(algorithm: Algorithm): void {
+  public async runAlgorithm(algorithm: Algorithm): Promise<void> {
     algorithm.maze = this
     algorithm.ran = this.ran
-    algorithm.init()
+    await algorithm.init()
+    await this.findPockets()
   }
 }
