@@ -58,3 +58,5 @@ export const raceTimeout = async (promise: object, time: number): Promise<any> =
 
   return Promise.race([promise, timeout])
 }
+
+export const capitalize = (string: string): string => string.split(' ').map((r: string): string => `${r[0].toUpperCase()}${r.slice(1)}`).join(' ')
