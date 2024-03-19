@@ -87,7 +87,7 @@ const global: Global = {
       Direction.left, Direction.right
     ],
   },
-  visualizerSpeed: 15,
+  visualizerSpeed: 5,
 }
 global.font = global.fontFromSize(global.fontConfig.size)
 
