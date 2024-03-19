@@ -17,9 +17,8 @@ import Map from './public/components/map.js'
 const maze = new Maze(32, 32, PRNG.simple(Hash.cyrb53('maze')), false)
 const map = new Map(maze)
 maze.runAlgorithm(
-  new Noise('clamped')
+  new Noise('normal')
     .setZoom(4)
-    .setIterations(2)
 /*
   new RandomWalker(75, true)
     .setWalkerChances(0.6, 0.2, 0)
